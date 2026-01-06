@@ -11,9 +11,9 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listingSchema, reviewShema } = require("./schema.js");
 
-const listingsRoute = require("./routes/listing");
-const reviewsRoute = require("./routes/review");
-const userRoute = require("./routes/user");
+const listingsRoute = require("./routes/listing.js");
+const reviewsRoute = require("./routes/review.js");
+const userRoute = require("./routes/user.js");
 
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
@@ -21,7 +21,7 @@ const flash = require("connect-flash");
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const User = require("./models/user");
+const User = require("./models/user.js");
 
 const port = process.env.PORT || 1300;
 
@@ -105,7 +105,7 @@ app.use((req, res, next) => {
 ======================= */
 
 app.get("/", (req, res) => {
-  res.send("home page");
+  res.redirect("/listings");
 });
 
 app.use("/listings", listingsRoute);
