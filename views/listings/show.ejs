@@ -1,0 +1,275 @@
+<% layout("layouts/boilerplate") %>
+<body>
+    <div class="container">
+        <!-- Listing Details -->
+        <div class="listing-details">
+            <div class="card animate_animated animate_fadeIn">
+                <img src="<%= listing.image.url %>" class="card-img-top" alt="Listing Image">
+                <div class="card-body">
+                    <h2 class="card-title"><%= listing.title %></h2>
+                    <p class="card-description"><%= listing.description %></p>
+                    <p class="card-price">Price: <strong>$<%= listing.price %></strong></p>
+                    <p class="card-location">
+                        <i class="fas fa-map-marker-alt"></i> <%= listing.location %>, <%= listing.country %>
+                    </p>
+                </div>
+            </div>
+            <% if(currUser && listing.owner && currUser._id && listing.owner._id && currUser._id.equals(listing.owner._id)) { %>
+            <div class="actions">
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-primary">Edit</a>
+                <form method="post" action="/listings/<%= listing._id %>?_method=DELETE" class="delete-form">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+            <% } %>
+        </div>
+
+
+        <% if(currUser) {%>
+        <!-- Review Form -->
+        <div class="review-section">
+            <h3>Leave a Review</h3>
+            <form action="/listings/<%= listing._id %>/reviews" method="post" class="review-form">
+                <div class="form-group">
+                    <label for="rating">Rating</label>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="review[rating]" value="5"><label for="star5">★</label>
+                        <input type="radio" id="star4" name="review[rating]" value="4"><label for="star4">★</label>
+                        <input type="radio" id="star3" name="review[rating]" value="3"><label for="star3">★</label>
+                        <input type="radio" id="star2" name="review[rating]" value="2"><label for="star2">★</label>
+                        <input type="radio" id="star1" name="review[rating]" value="1"><label for="star1">★</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comment">Comment</label>
+                    <textarea name="review[comment]" id="comment" class="form-control" placeholder="Write your comment here..." rows="4"></textarea>
+                </div>
+                <button class="btn btn-dark">Submit</button>
+            </form>
+        </div>
+        <% } %>
+
+        <!-- Display Reviews -->
+        <div class="review-list">
+            <h4>Reviews</h4>
+            <% if (listing.reviews.length > 0) { %>
+                <div class="row">
+                    <% listing.reviews.forEach(review => { %>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card review-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= review.author.username %></h5>
+                                    <p class="card-text"><%= review.comment %></p>
+                                    <p class="card-text">
+                                        <span class="text-warning">★</span> <%= review.rating %> stars
+                                    </p>
+                                </div>
+                                <form
+                                    action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                                    method="post"
+                                    class="p-3"
+                                >
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p>No reviews yet. Be the first to leave one!</p>
+            <% } %>
+        </div>
+        <div class="col-8 offset-3 mb-3">
+            <h3>where you'll be</h3>
+        <div id="map" style="height: 350px;"></div>
+    </div>
+
+    </div>
+    
+
+    <style>
+        /* General Container Styling */
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Card Styling */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .card-price {
+            font-size: 1.2rem;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .card-location {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* Actions Section */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .actions .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+        }
+
+        /* Review Form */
+        .review-section {
+            margin-top: 50px;
+        }
+
+        .review-section h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .review-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .review-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .review-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .review-form .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .review-form .btn:hover {
+            background-color: #555;
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f39c12;
+        }
+
+        /* Review Card */
+        .review-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .review-card h5 {
+            color: #343a40;
+            font-weight: bold;
+        }
+
+        .review-card p {
+            margin: 0.5rem 0;
+        }
+    </style>
+    <script>
+        // Initialize the map and set the view to a specific location
+        const map = L.map('map').setView([15.2993, 74.1240], 10); // Centered on Europe with a zoom level of 5
+    
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 10,
+          minZoom: 3,
+        }).addTo(map);
+    
+        // Add a simple marker (optional)
+        L.marker([15.2993, 74.1240]).addTo(map)
+          .bindPopup("here you'll be ") // Text inside the popup
+          .openPopup();
+      </script>
+</body>
